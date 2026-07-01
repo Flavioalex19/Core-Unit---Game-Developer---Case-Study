@@ -550,4 +550,23 @@ public abstract class Player : MappedObject, IDrawLine
         }
         Destroy(gameObject);
     }
+    //Speed Boost
+    public void ApplyTemporarySpeedBoost(float _Duration, float _Multiplier)
+    {
+        if (m_SpeedPowerUpCoroutine != null)
+            StopCoroutine(m_SpeedPowerUpCoroutine);
+
+        m_SpeedPowerUpCoroutine = StartCoroutine(SpeedBoostCoroutine(_Duration, _Multiplier));
+    }
+
+    private IEnumerator SpeedBoostCoroutine(float _Duration, float _Multiplier)
+    {
+        float originalSpeed = m_Speed;
+        m_Speed *= _Multiplier;
+
+        yield return new WaitForSeconds(_Duration);
+
+        if (this != null)
+            m_Speed = originalSpeed;
+    }
 }

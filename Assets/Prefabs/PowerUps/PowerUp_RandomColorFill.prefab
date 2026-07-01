@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1004128854978530}
-  m_Mesh: {fileID: 4300000, guid: 91481f6ed436f4748a905d33054d306e, type: 3}
+  m_Mesh: {fileID: 4300000, guid: abcf259595eb14a42ac7096f27e54853, type: 3}
 --- !u!23 &23226596930372142
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9914,7 +9914,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: db56ded6412dc0648895197a0bc23e31, type: 2}
-  - {fileID: 2100000, guid: db56ded6412dc0648895197a0bc23e31, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14765,7 +14764,6 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3b74779a12f08c844a60b2a5a0079454, type: 2}
   - {fileID: 2100000, guid: 3b74779a12f08c844a60b2a5a0079454, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -19693,9 +19691,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4151712711243320}
-  - component: {fileID: 114384884349590960}
+  - component: {fileID: 4791956709299086601}
   m_Layer: 0
-  m_Name: PowerUp_PaintBomb
+  m_Name: PowerUp_RandomColorFill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19719,7 +19717,7 @@ Transform:
   - {fileID: 4628080035840538}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114384884349590960
+--- !u!114 &4791956709299086601
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -19728,38 +19726,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1665382018052950}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fdfa5c2cd20547b6a9b966eb4d152fc, type: 3}
+  m_Script: {fileID: 11500000, guid: 78baa9e018a8cf848a07c887159c4417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_MappedTransform: {fileID: 4151712711243320}
   m_Duration: 5
   m_Model: {fileID: 23226596930372142}
-  m_ParticleSystem: {fileID: 198652164752254154}
-  m_IdleParticleSystem: {fileID: 198361814603595030}
+  m_ParticleSystem: {fileID: 198098790276296408}
+  m_IdleParticleSystem: {fileID: 198757457519128994}
   m_Shadow: {fileID: 1055350778699962}
-  m_Radius: 15
-  m_FillDuration: 1
+  m_Radius: 7.5
+  m_FillDuration: 0.35
   m_FillCurve:
     serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
+    m_Curve: []
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4

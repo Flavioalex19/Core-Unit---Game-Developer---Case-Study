@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1004128854978530}
-  m_Mesh: {fileID: 4300000, guid: 91481f6ed436f4748a905d33054d306e, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 623cc52a88403ea4b98a3feb279a491b, type: 3}
 --- !u!23 &23226596930372142
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -19693,9 +19693,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4151712711243320}
-  - component: {fileID: 114384884349590960}
+  - component: {fileID: -6079469979427097116}
   m_Layer: 0
-  m_Name: PowerUp_PaintBomb
+  m_Name: PowerUp_SpeedBoost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19719,7 +19719,7 @@ Transform:
   - {fileID: 4628080035840538}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114384884349590960
+--- !u!114 &-6079469979427097116
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -19728,41 +19728,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1665382018052950}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fdfa5c2cd20547b6a9b966eb4d152fc, type: 3}
+  m_Script: {fileID: 11500000, guid: 2d5891520feb63042980a61d0b60c715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MappedTransform: {fileID: 4151712711243320}
+  m_MappedTransform: {fileID: 4264751048967694}
   m_Duration: 5
   m_Model: {fileID: 23226596930372142}
-  m_ParticleSystem: {fileID: 198652164752254154}
-  m_IdleParticleSystem: {fileID: 198361814603595030}
+  m_ParticleSystem: {fileID: 198098790276296408}
+  m_IdleParticleSystem: {fileID: 198757457519128994}
   m_Shadow: {fileID: 1055350778699962}
-  m_Radius: 15
-  m_FillDuration: 1
-  m_FillCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_speedMultiplier: 1.2
 --- !u!1 &1779027566444506
 GameObject:
   m_ObjectHideFlags: 0

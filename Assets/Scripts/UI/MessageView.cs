@@ -20,7 +20,7 @@ public class MessageView : SingletonMB<MessageView>
 
 	// Cache
 	private IGameService			m_GameService;
-	private RectTransform		m_MessageTr;
+    private RectTransform		m_MessageTr;
 
 	[Inject]
 	public void Construct(IGameService gameService)
@@ -94,4 +94,5 @@ public class MessageView : SingletonMB<MessageView>
 		else
 			StartCoroutine(ShowMessageCoroutine(m_MessageQueue.Dequeue()));
 	}
+    
 }

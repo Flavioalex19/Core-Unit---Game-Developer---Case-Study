@@ -33,6 +33,8 @@ public class GameService : IGameService
 
     public delegate void OnPlayerSpawned(Player _Player, int _Index);
     public event OnPlayerSpawned onPlayerSpawned;
+    public bool IsBoosterMode = false; /*get; private set; }*/
+    public static bool Debug_EnableBoosterMode { get; set; } = false;
 
 #if UNITY_EDITOR
     public int m_DebugLevel = 1;
@@ -50,6 +52,7 @@ public class GameService : IGameService
     public List<int> m_XPByRank => m_GameConfig.m_XPByRank;
 
     public bool m_AlreadyRevive = false;
+
 
     // Cache
     private IStatsService m_StatsService;
@@ -84,7 +87,9 @@ public class GameService : IGameService
     private GameConfig m_GameConfig;
     private DiContainer m_Container;
     private ISceneEventsService m_SceneEventsService;
-    
+
+
+
     [Inject]
     public void Construct(GameConfig gameConfig, IStatsService statsService, IBattleRoyaleService battleRoyaleService,
         ITerrainService terrainService, DiContainer container, ISceneEventsService sceneEventsService)
@@ -132,7 +137,7 @@ public class GameService : IGameService
 
         m_PowerUps = new List<PowerUpData>(Resources.LoadAll<PowerUpData>("PowerUps"));
     }
-
+    
     private void OnAwake()
     {
         float halfWidth = m_TerrainService.WorldHalfWidth;
@@ -179,6 +184,9 @@ public class GameService : IGameService
         Debug.Log("Current difficulty is " + m_StatsService.GetLevel());
 #endif
         ChangePhase(GamePhase.MAIN_MENU);
+        //Debug_EnableNewBoosters = true;
+        //IsBoosterMode = true;                    
+        
     }
 
     public List<Color> GetColors()
@@ -371,7 +379,8 @@ public class GameService : IGameService
             m_PowerUpRate = Random.Range(c_MinPowerUpRate, c_MaxPowerUpRate);
             m_LastPowerUpTime = Time.time;
 
-            PowerUpData powerUpData = m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+            //PowerUpData powerUpData = m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+            PowerUpData powerUpData = GetPowerUpToSpawn();
             PopObjectRandomly(powerUpData.m_Prefab);
         }
 
@@ -543,4 +552,27 @@ public class GameService : IGameService
 
         return 0;
     }
+    private PowerUpData GetPowerUpToSpawn()
+    {
+        // Se o debug de novos boosters estiver ligado E estivermos no Booster Mode
+        if (IsBoosterMode)
+        {
+            return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+        }
+        else
+        {
+            // Modo normal: só os boosters originais (filtra os novos)
+            var normalPowerUps = m_PowerUps.FindAll(p =>
+                !p.m_Prefab.name.Contains("SpeedBoost") &&
+                !p.m_Prefab.name.Contains("ColorFill"));
+
+            return normalPowerUps[Random.Range(0, normalPowerUps.Count)];
+        }
+    }
+    public void StartBoosterMode()
+    {
+        IsBoosterMode = true;
+        ChangePhase(GamePhase.LOADING);
+    }
+    
 }

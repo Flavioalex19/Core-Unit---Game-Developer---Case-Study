@@ -124,4 +124,8 @@ public class MainMenuView : View<MainMenuView>
         m_StatsService.FavoriteSkin = m_IdSkin;
         GameService.SetColor(GameService.ComputeCurrentPlayerColor(true, 0));
     }
+    public void OnBoosterModeButton()
+    {
+      
+    }
 }
