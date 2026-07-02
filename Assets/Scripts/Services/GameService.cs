@@ -232,7 +232,17 @@ public class GameService : IGameService
                 m_LastBrushTime = Time.time;
                 m_LastPowerUpTime = Time.time;
                 m_PowerUpRate = Random.Range(c_MinPowerUpRate, c_MaxPowerUpRate);
-                m_Level = m_StatsService.GetLevel();
+                //m_Level = m_StatsService.GetLevel();
+                //Set difficulty
+                if (IsBoosterMode)
+                {
+                    m_Level = BoosterLevel;                    
+                }
+                else
+                {
+                    m_Level = m_StatsService.GetLevel();       
+                }
+
                 PopPlayers();
 
                 if (m_OrderedPlayers == null)
@@ -253,13 +263,14 @@ public class GameService : IGameService
             case GamePhase.END:
                 int playerScore = Mathf.RoundToInt(m_Players[0].percent * 100.0f);
                 m_StatsService.TryToSetBestScore(playerScore);
-
+                EndView.Instance.SetTitleColor(m_BattleRoyaleService.GetHumanPlayer().m_Color);
                 int rankingScore = -1; // Difficulty down by default
                 int playerRank = m_BattleRoyaleService.GetHumanPlayer().m_Rank;
                 
                 //Pass booster mode level
                 if (IsBoosterMode)
                 {
+                    
                     if (playerRank == 0) 
                     {
                         BoosterLevel++;

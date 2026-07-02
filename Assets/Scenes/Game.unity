@@ -1951,6 +1951,21 @@ PrefabInstance:
       propertyPath: m_BoosterLevelText
       value: 
       objectReference: {fileID: 1963023146}
+    - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
+        type: 3}
+      propertyPath: m_ColoredImages.Array.size
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
+        type: 3}
+      propertyPath: m_ColoredImages.Array.data[9]
+      value: 
+      objectReference: {fileID: 1997233709}
+    - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
+        type: 3}
+      propertyPath: m_ColoredImages.Array.data[10]
+      value: 
+      objectReference: {fileID: 620175527}
     - target: {fileID: 224377474026299956, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -2403,7 +2418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9058824, g: 0.7490196, b: 0.3803922, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8390727, b: 0.66042185, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

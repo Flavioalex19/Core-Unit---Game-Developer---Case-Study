@@ -213,4 +213,15 @@ public class EndView : View<EndView>
             SceneManager.LoadScene("Game");          
         }
     }
+    //change button color 
+    public void SetTitleColor(Color _Color)
+    {
+        Image buttonImage = m_ExitBoosterButton.GetComponent<Image>();
+        if (buttonImage != null)
+            buttonImage.color = _Color;
+
+        Text buttonText = m_ExitBoosterButton.GetComponentInChildren<Text>();
+        if (buttonText != null)
+            buttonText.color = _Color;
+    }
 }
