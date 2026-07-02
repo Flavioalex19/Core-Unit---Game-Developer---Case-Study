@@ -34,6 +34,8 @@ public class EndView : View<EndView>
     private List<Text> m_Texts;
     private int m_DeadId;
     private float m_RefreshTimer;
+    //Booster Mode variables
+    public GameObject m_ExitBoosterButton;
 
     private IBattleRoyaleService m_BattleRoyaleService;
     private IGameService m_GameService;
@@ -75,8 +77,11 @@ public class EndView : View<EndView>
     {
         if (m_GameService.currentPhase == GamePhase.END)
         {
+            int playerRank = m_BattleRoyaleService.GetHumanPlayer().m_Rank;
+
             m_SceneEventsService.TriggerOnClean();
             SceneManager.LoadScene("Game");
+
         }
     }
 
@@ -96,6 +101,14 @@ public class EndView : View<EndView>
         base.OnGamePhaseChanged(_GamePhase);
 
         m_ContinueButton.SetActive(_GamePhase == GamePhase.END);
+        if (m_GameService.IsBoosterMode)
+        {
+            m_ExitBoosterButton.SetActive(true);
+        }
+        else
+        {
+            m_ExitBoosterButton.SetActive(false);
+        }
 
         switch (_GamePhase)
         {
@@ -104,6 +117,7 @@ public class EndView : View<EndView>
                     Transition(false);
 
                 m_DeadId = m_PlayerSlots.Count;
+
                 break;
         }
     }
@@ -163,6 +177,16 @@ public class EndView : View<EndView>
                 player = m_GameService.m_Players[i];
 				RefreshPlayerSlot(player.m_Rank, player.Name, player.Score, player.m_Color, player.isEliminated);
             }
+        }
+    }
+    public void OnExitBoosterButton()
+    {
+        if (m_GameService.IsBoosterMode)
+        {
+            m_GameService.SaveBoosterLevel();        
+            m_GameService.IsBoosterMode = false;     
+            m_SceneEventsService.TriggerOnClean();
+            SceneManager.LoadScene("Game");          
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -14,6 +15,8 @@ public class MainMenuView : View<MainMenuView>
     public InputField m_InputField;
     public List<Image> m_ColoredImages;
     public List<Text> m_ColoredTexts;
+    //BoosterMode
+    public Text m_BoosterLevelText;
 
     public GameObject m_BrushGroundLight;
     public GameObject m_BrushesPrefab;
@@ -54,6 +57,9 @@ public class MainMenuView : View<MainMenuView>
             case GamePhase.MAIN_MENU:
                 m_BrushGroundLight.SetActive(true);
                 Transition(true);
+                //Update BoosterMode Level
+                if (m_BoosterLevelText != null)
+                    m_BoosterLevelText.text = GameService.BoosterLevel.ToString();
                 break;
 
             case GamePhase.LOADING:
@@ -126,6 +132,6 @@ public class MainMenuView : View<MainMenuView>
     }
     public void OnBoosterModeButton()
     {
-      
+      GameService.StartBoosterMode();
     }
 }

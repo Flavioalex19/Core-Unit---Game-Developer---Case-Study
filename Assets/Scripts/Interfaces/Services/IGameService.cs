@@ -9,6 +9,8 @@ public interface IGameService
     event Action onEndGame;
     event Action onScoresCalculated;
     bool m_IsPlaying { get; set; }
+    bool IsBoosterMode { get; set; }
+    int BoosterLevel { get; set; } 
     GamePhase currentPhase { get; }
     int m_PlayerSkinID { get; set; }
     List<SkinData> m_Skins { get; set; }
@@ -23,4 +25,9 @@ public interface IGameService
     void SkipRV();
     void TryRevive();
     Player GetBestPlayer();
+    //new 
+    void StartBoosterMode();
+    void RestartBoosterMatch();
+    //void LoadBoosterLevel();
+    void SaveBoosterLevel();
 }

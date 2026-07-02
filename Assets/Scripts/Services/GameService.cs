@@ -33,7 +33,8 @@ public class GameService : IGameService
 
     public delegate void OnPlayerSpawned(Player _Player, int _Index);
     public event OnPlayerSpawned onPlayerSpawned;
-    public bool IsBoosterMode = false; /*get; private set; }*/
+    public bool IsBoosterMode { get;  set; } = false;
+    public int BoosterLevel { get;  set; } = 1;
     public static bool Debug_EnableBoosterMode { get; set; } = false;
 
 #if UNITY_EDITOR
@@ -136,8 +137,20 @@ public class GameService : IGameService
         m_PlayerNameData = Resources.Load<PlayerNameData>("PlayerNames");
 
         m_PowerUps = new List<PowerUpData>(Resources.LoadAll<PowerUpData>("PowerUps"));
+
+        //Change that later???
+        LoadBoosterLevel();
     }
-    
+    //Save and Load booster level
+    private void LoadBoosterLevel()
+    {
+        BoosterLevel = PlayerPrefs.GetInt("BoosterLevel", 1);
+    }
+
+    public void SaveBoosterLevel()
+    {
+        PlayerPrefs.SetInt("BoosterLevel", BoosterLevel);
+    }
     private void OnAwake()
     {
         float halfWidth = m_TerrainService.WorldHalfWidth;
@@ -237,7 +250,23 @@ public class GameService : IGameService
 
                 int rankingScore = -1; // Difficulty down by default
                 int playerRank = m_BattleRoyaleService.GetHumanPlayer().m_Rank;
-
+                
+                //Pass booster mode level
+                if (IsBoosterMode)
+                {
+                    if (playerRank == 0) 
+                    {
+                        BoosterLevel++;
+                    }
+                    else 
+                    {
+                        BoosterLevel = 1;
+                    }
+                    //Save booster level
+                    SaveBoosterLevel();
+                }
+                
+                if(IsBoosterMode) SaveBoosterLevel();//Save level
                 if (playerRank == 0) // Best, then increase difficulty
                     rankingScore = 1;
                 else if (playerRank >= 2) // Second or third, then stay at same difficulty
@@ -574,5 +603,22 @@ public class GameService : IGameService
         IsBoosterMode = true;
         ChangePhase(GamePhase.LOADING);
     }
-    
+    public void TurnOffBoosterMode()
+    {
+        IsBoosterMode = false;
+    }
+    public void RestartBoosterMatch()
+    {
+        ClearGame();
+        //Respawn
+        PopPlayers();
+        //Wait for the countdown
+        m_BattleRoyaleService.m_IsPlaying = false;
+        EndView.Instance.Transition(false);     
+        //Hide "fake loading"
+        LoadingView.Instance.Transition(false); 
+
+        ChangePhase(GamePhase.GAME);            
+        SaveBoosterLevel();
+    }
 }
