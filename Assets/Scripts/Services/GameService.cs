@@ -272,11 +272,17 @@ public class GameService : IGameService
                 else if (playerRank >= 2) // Second or third, then stay at same difficulty
                     rankingScore = 0;
 
-                m_StatsService.AddGameResult(rankingScore);
-                int xp = m_XPByRank[playerRank];
-                m_StatsService.SetLastXP(xp);
+                if (!IsBoosterMode)
+                {
+                    m_StatsService.AddGameResult(rankingScore);
+                    int xp = m_XPByRank[playerRank];
+                    m_StatsService.SetLastXP(xp);
+                    PreEndView.Instance.LaunchPreEnd();
+                    m_StatsService.GainXP();
+                }
+                
+
                 PreEndView.Instance.LaunchPreEnd();
-                m_StatsService.GainXP();
                 break;
         }
 
@@ -612,6 +618,12 @@ public class GameService : IGameService
         ClearGame();
         //Respawn
         PopPlayers();
+        //Rest List/standings
+        if (m_OrderedPlayers == null)
+            m_OrderedPlayers = new List<Player>();
+        else
+            m_OrderedPlayers.Clear();
+        m_OrderedPlayers.AddRange(m_Players);
         //Wait for the countdown
         m_BattleRoyaleService.m_IsPlaying = false;
         EndView.Instance.Transition(false);     

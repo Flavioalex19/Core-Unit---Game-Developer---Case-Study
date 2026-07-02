@@ -77,10 +77,34 @@ public class EndView : View<EndView>
     {
         if (m_GameService.currentPhase == GamePhase.END)
         {
+            if (GameService.IsBoosterMode)
+            {
+                if (m_BattleRoyaleService.GetHumanPlayer().m_Rank == 0)
+                {
+                    // Continue Run
+                    m_GameService.RestartBoosterMatch();
+                }
+                else
+                {
+                    //Retun To Menu
+                    m_GameService.IsBoosterMode = false;
+                    m_SceneEventsService.TriggerOnClean();
+                    SceneManager.LoadScene("Game");
+                }
+            }
+            else
+            {
+                int playerRank = m_BattleRoyaleService.GetHumanPlayer().m_Rank;
+
+                m_SceneEventsService.TriggerOnClean();
+                SceneManager.LoadScene("Game");
+            }
+            /*
             int playerRank = m_BattleRoyaleService.GetHumanPlayer().m_Rank;
 
             m_SceneEventsService.TriggerOnClean();
             SceneManager.LoadScene("Game");
+            */
 
         }
     }
