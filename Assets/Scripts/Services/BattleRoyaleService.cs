@@ -249,4 +249,5 @@ public class BattleRoyaleService : IBattleRoyaleService
         if (m_CountdownCoroutine != null)
 	        PoolSingleton.Instance.StopCoroutine(m_CountdownCoroutine);
     }
+
 }

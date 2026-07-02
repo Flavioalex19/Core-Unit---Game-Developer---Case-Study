@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Zenject;
 using Random = UnityEngine.Random;
+using System.Runtime.InteropServices;
 
 public enum GamePhase
 {
     MAIN_MENU,
     LOADING,
+    BOOSTER_CHOICE,
     GAME,
     PRE_END,
     END
@@ -35,6 +37,7 @@ public class GameService : IGameService
     public event OnPlayerSpawned onPlayerSpawned;
     public bool IsBoosterMode { get;  set; } = false;
     public int BoosterLevel { get;  set; } = 1;
+    public List<PowerUpData> m_SelectedBoosterPowerUps = new List<PowerUpData>();
     public static bool Debug_EnableBoosterMode { get; set; } = false;
 
 #if UNITY_EDITOR
@@ -238,6 +241,9 @@ public class GameService : IGameService
                     m_OrderedPlayers.Clear();
 
                 m_OrderedPlayers.AddRange(m_Players);
+                break;
+            case GamePhase.BOOSTER_CHOICE:
+                // TODO
                 break;
 
             case GamePhase.GAME:
@@ -589,14 +595,13 @@ public class GameService : IGameService
     }
     private PowerUpData GetPowerUpToSpawn()
     {
-        // Se o debug de novos boosters estiver ligado E estivermos no Booster Mode
-        if (IsBoosterMode)
+        if (IsBoosterMode && m_SelectedBoosterPowerUps.Count > 0)
         {
-            return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+            //return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+            return m_SelectedBoosterPowerUps[Random.Range(0, m_SelectedBoosterPowerUps.Count)];
         }
         else
         {
-            // Modo normal: só os boosters originais (filtra os novos)
             var normalPowerUps = m_PowerUps.FindAll(p =>
                 !p.m_Prefab.name.Contains("SpeedBoost") &&
                 !p.m_Prefab.name.Contains("ColorFill"));
@@ -628,9 +633,15 @@ public class GameService : IGameService
         m_BattleRoyaleService.m_IsPlaying = false;
         EndView.Instance.Transition(false);     
         //Hide "fake loading"
-        LoadingView.Instance.Transition(false); 
+        LoadingView.Instance.Transition(false);
 
-        ChangePhase(GamePhase.GAME);            
+        //ChangePhase(GamePhase.GAME);            
+        ChangePhase(GamePhase.BOOSTER_CHOICE);
+        
         SaveBoosterLevel();
+    }
+    public List<PowerUpData> GetPowerUpList()
+    {
+        return m_PowerUps;
     }
 }

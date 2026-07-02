@@ -30,4 +30,6 @@ public interface IGameService
     void RestartBoosterMatch();
     //void LoadBoosterLevel();
     void SaveBoosterLevel();
+    List<PowerUpData> GetPowerUpList();
+    
 }

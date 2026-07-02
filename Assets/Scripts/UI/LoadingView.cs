@@ -58,8 +58,14 @@ public class LoadingView : View<LoadingView> {
     protected override void Update()
     {
         base.Update();
-        if (Input.GetMouseButtonDown(0) && GameService.currentPhase == GamePhase.LOADING && m_LoadingFinish)
-            GameService.ChangePhase(GamePhase.GAME);
+        if (Input.GetMouseButtonDown(0) && GameService.currentPhase == GamePhase.LOADING && m_LoadingFinish) 
+        {
+            if (GameService.IsBoosterMode)
+                GameService.ChangePhase(GamePhase.BOOSTER_CHOICE);
+            else
+                GameService.ChangePhase(GamePhase.GAME);
+        }
+            //GameService.ChangePhase(GamePhase.GAME);
     }
 
     protected override void OnGamePhaseChanged(GamePhase _GamePhase)
@@ -75,6 +81,10 @@ public class LoadingView : View<LoadingView> {
                 break;
 
             case GamePhase.GAME:
+                if (m_Visible)
+                    Transition(false);
+                break;
+            case GamePhase.BOOSTER_CHOICE:     
                 if (m_Visible)
                     Transition(false);
                 break;
