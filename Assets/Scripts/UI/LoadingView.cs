@@ -60,10 +60,7 @@ public class LoadingView : View<LoadingView> {
         base.Update();
         if (Input.GetMouseButtonDown(0) && GameService.currentPhase == GamePhase.LOADING && m_LoadingFinish) 
         {
-            if (GameService.IsBoosterMode)
-                GameService.ChangePhase(GamePhase.BOOSTER_CHOICE);
-            else
-                GameService.ChangePhase(GamePhase.GAME);
+            GameService.ChangePhase(GamePhase.GAME);
         }
             //GameService.ChangePhase(GamePhase.GAME);
     }
@@ -84,10 +81,7 @@ public class LoadingView : View<LoadingView> {
                 if (m_Visible)
                     Transition(false);
                 break;
-            case GamePhase.BOOSTER_CHOICE:     
-                if (m_Visible)
-                    Transition(false);
-                break;
+            
         }
     }
 
