@@ -10,6 +10,7 @@ public enum GamePhase
 {
     MAIN_MENU,
     LOADING,
+    BOOSTER_CHOICE,
     GAME,
     PRE_END,
     END
@@ -250,6 +251,9 @@ public class GameService : IGameService
                     m_OrderedPlayers.Clear();
 
                 m_OrderedPlayers.AddRange(m_Players);
+                break;
+            case GamePhase.BOOSTER_CHOICE:
+                // TODO
                 break;
 
             case GamePhase.GAME:
@@ -642,7 +646,8 @@ public class GameService : IGameService
         //Hide "fake loading"
         LoadingView.Instance.Transition(false);
 
-        ChangePhase(GamePhase.GAME);            
+        //ChangePhase(GamePhase.GAME);            
+        ChangePhase(GamePhase.BOOSTER_CHOICE);
         
         SaveBoosterLevel();
     }
