@@ -37,6 +37,7 @@ public class GameService : IGameService
     public bool IsBoosterMode { get;  set; } = false;
     public int BoosterLevel { get;  set; } = 1;
     public List<PowerUpData> m_SelectedBoosterPowerUps = new List<PowerUpData>();
+    public List<BoosterLevelSetup> m_BoosterLevelSetups;
     public static bool Debug_EnableBoosterMode { get; set; } = false;
 
 #if UNITY_EDITOR
@@ -142,6 +143,11 @@ public class GameService : IGameService
 
         //Change that later???
         LoadBoosterLevel();
+
+        // Load BoosterLevelSetup from Resources/BoosterLevels
+        m_BoosterLevelSetups = new List<BoosterLevelSetup>(
+            Resources.LoadAll<BoosterLevelSetup>("BoosterLevels")
+        );
     }
     //Save and Load booster level
     private void LoadBoosterLevel()
@@ -602,10 +608,21 @@ public class GameService : IGameService
     }
     private PowerUpData GetPowerUpToSpawn()
     {
-        if (IsBoosterMode && m_SelectedBoosterPowerUps.Count > 0)
+        if (IsBoosterMode)
         {
             //return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
-            return m_SelectedBoosterPowerUps[Random.Range(0, m_SelectedBoosterPowerUps.Count)];
+            //return m_SelectedBoosterPowerUps[Random.Range(0, m_SelectedBoosterPowerUps.Count)];
+            // Pega o setup do nível atual
+            BoosterLevelSetup currentSetup = GetCurrentBoosterSetup();
+
+            if (currentSetup != null && currentSetup.powerUps.Count > 0)
+            {
+                return currentSetup.powerUps[Random.Range(0, currentSetup.powerUps.Count)];
+            }
+            else
+            {
+                return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
+            }
         }
         else
         {
@@ -615,6 +632,21 @@ public class GameService : IGameService
 
             return normalPowerUps[Random.Range(0, normalPowerUps.Count)];
         }
+    }
+    public BoosterLevelSetup GetCurrentBoosterSetup()
+    {
+        if (m_BoosterLevelSetups == null || m_BoosterLevelSetups.Count == 0)
+            return null;
+
+        int index = BoosterLevel - 1; 
+
+        if (index < 0)
+            index = 0;
+
+        if (index >= m_BoosterLevelSetups.Count)
+            return null; 
+
+        return m_BoosterLevelSetups[index];
     }
     public void StartBoosterMode()
     {
