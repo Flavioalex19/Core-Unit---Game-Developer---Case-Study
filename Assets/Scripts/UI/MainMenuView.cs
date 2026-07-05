@@ -18,6 +18,7 @@ public class MainMenuView : View<MainMenuView>
     //BoosterMode
     public Text m_BoosterLevelText;
 
+
     public GameObject m_BrushGroundLight;
     public GameObject m_BrushesPrefab;
     public int m_IdSkin = 0;
@@ -28,6 +29,14 @@ public class MainMenuView : View<MainMenuView>
     public string[] m_Ratings;
 
     private IStatsService m_StatsService;
+    [Header("Skin Selection Screen")]
+    public Transform m_SelectedBrushPreviewParent;   
+    public GameObject m_SkinButtonPrefab;            
+    public Transform m_SkinButtonContainer;          
+
+    private GameObject m_CurrentPreviewBrush;
+    private int m_SelectedBrushIndex;
+    private int m_SelectedColorIndex;
 
     [Inject]
     public void Construct(IStatsService statsService)
@@ -60,6 +69,7 @@ public class MainMenuView : View<MainMenuView>
                 //Update BoosterMode Level
                 if (m_BoosterLevelText != null)
                     m_BoosterLevelText.text = GameService.BoosterLevel.ToString();
+                PopulateSkinButtons();
                 break;
 
             case GamePhase.LOADING:
@@ -134,4 +144,106 @@ public class MainMenuView : View<MainMenuView>
     {
       GameService.StartBoosterMode();
     }
+
+
+    /// <summary>
+    /// Popula o ScrollView com todos os skins (Brush + Cores)
+    /// Lógica: Para cada brush, cria botões de todas as suas cores
+    /// </summary>
+    public void PopulateSkinButtons()
+    {
+        // Limpa botões anteriores
+        foreach (Transform child in m_SkinButtonContainer)
+            Destroy(child.gameObject);
+
+        for (int brushIndex = 0; brushIndex < GameService.m_Skins.Count; brushIndex++)
+        {
+            SkinData skin = GameService.m_Skins[brushIndex];
+            int colorCount = skin.Color.m_Colors.Count;
+
+            for (int colorIndex = 0; colorIndex < colorCount; colorIndex++)
+            {
+                GameObject buttonGO = Instantiate(m_SkinButtonPrefab, m_SkinButtonContainer);
+
+                // Configura o botão (adicione um componente SkinButton no prefab ou use isso)
+                Button btn = buttonGO.GetComponent<Button>();
+                int capturedBrush = brushIndex;
+                int capturedColor = colorIndex;
+
+                btn.onClick.AddListener(() => SelectSkin(capturedBrush, capturedColor));
+
+                // Opcional: mostrar nome ou preview pequeno no botão
+                // Text label = buttonGO.GetComponentInChildren<Text>();
+                // label.text = $"Brush {brushIndex} - Cor {colorIndex}";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Chamado quando o jogador clica em um skin da lista
+    /// </summary>
+    public void SelectSkin(int brushIndex, int colorIndex)
+    {
+        m_SelectedBrushIndex = brushIndex;
+        m_SelectedColorIndex = colorIndex;
+
+        UpdateSelectedBrushPreview(brushIndex, colorIndex);
+
+        // Aqui você pode salvar temporariamente ou já aplicar
+        GameService.m_PlayerSkinID = brushIndex;
+        // Se quiser salvar direto:
+        // m_StatsService.FavoriteSkin = brushIndex;
+    }
+
+    /// <summary>
+    /// Atualiza o preview 3D do brush selecionado
+    /// </summary>
+    private void UpdateSelectedBrushPreview(int brushIndex, int colorIndex)
+    {
+        SkinData skin = GameService.m_Skins[brushIndex];
+        Color targetColor = skin.Color.m_Colors[colorIndex];
+
+        // 1. Deleta o modelo anterior (filho do SelectedBrush)
+        if (m_SelectedBrushPreviewParent.childCount > 0)
+        {
+            for (int i = m_SelectedBrushPreviewParent.childCount - 1; i >= 0; i--)
+            {
+                Destroy(m_SelectedBrushPreviewParent.GetChild(i).gameObject);
+            }
+        }
+
+        // 2. Instancia o novo modelo como FILHO do SelectedBrush
+        GameObject newModel = Instantiate(skin.Brush.m_Prefab, m_SelectedBrushPreviewParent);
+        m_CurrentPreviewBrush = newModel;
+
+        // 3. Aplica a cor correta
+        Brush brushComponent = newModel.GetComponent<Brush>();
+        if (brushComponent != null && brushComponent.m_Renderers != null)
+        {
+            foreach (Renderer renderer in brushComponent.m_Renderers)
+            {
+                if (renderer != null && renderer.material != null)
+                {
+                    renderer.material.color = targetColor;
+                }
+            }
+        }
+        else
+        {
+            // Fallback caso o prefab não tenha o componente Brush configurado
+            Renderer[] renderers = newModel.GetComponentsInChildren<Renderer>();
+            foreach (Renderer r in renderers)
+            {
+                if (r.material != null)
+                    r.material.color = targetColor;
+            }
+        }
+
+        // 4. Garante posicionamento correto
+        newModel.transform.localPosition = Vector3.zero;
+        newModel.transform.localRotation = Quaternion.identity;
+        newModel.transform.localScale = new Vector3(80,80,80);
+    }
+
+
 }

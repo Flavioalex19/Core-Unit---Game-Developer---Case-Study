@@ -610,9 +610,7 @@ public class GameService : IGameService
     {
         if (IsBoosterMode)
         {
-            //return m_PowerUps[Random.Range(0, m_PowerUps.Count)];
-            //return m_SelectedBoosterPowerUps[Random.Range(0, m_SelectedBoosterPowerUps.Count)];
-            // Pega o setup do nível atual
+            //Get current set up from the level
             BoosterLevelSetup currentSetup = GetCurrentBoosterSetup();
 
             if (currentSetup != null && currentSetup.powerUps.Count > 0)

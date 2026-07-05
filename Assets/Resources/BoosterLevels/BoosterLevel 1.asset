@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: BoosterLevel 1
   m_EditorClassIdentifier: 
   powerUps:
-  - {fileID: 11400000, guid: 28c2b8462ae9f2744952ecd9ef836a51, type: 2}
   - {fileID: 11400000, guid: 707909f05d8274438a62b7a0fec4fa9b, type: 2}
