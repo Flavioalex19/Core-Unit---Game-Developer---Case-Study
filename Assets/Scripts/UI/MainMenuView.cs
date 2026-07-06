@@ -42,20 +42,20 @@ public class MainMenuView : View<MainMenuView>
     public RectTransform m_ScrollViewport;     // Viewport do ScrollRect
     public float m_TopFadeStart = 90f;         // Distância do topo onde começa o fade (em pixels)
     public float m_TopFadeEnd = 25f;           // Distância onde some completamente
-    private List<RotatingIconUI> m_ActiveRotatingIcons = new List<RotatingIconUI>();
     private List<RectTransform> m_ActiveIconRects = new List<RectTransform>(); // paralelo, pra checar visibilidade
 
     private List<GameObject> m_ActiveBrushModels = new List<GameObject>();
 
 
-    [Header("Fade & Scale no Scroll")]
-    public float m_FadeStartDistance = 80f;   // Distância (em pixels) onde começa o fade
+    [Header("Fade & Scale")]
+    public float m_FadeStartDistance = 80f;   // distance to fade
     public float m_FadeEndDistance = 20f;
 
     //DebugBtns
     public GameObject m_BoosterModeBTN;
     public GameObject m_NewSelectionBtn;
     public GameObject m_OldSelectionBtn;
+    public GameObject m_oldPlayBtn;
 
     [Inject]
     public void Construct(IStatsService statsService)
@@ -71,35 +71,7 @@ public class MainMenuView : View<MainMenuView>
     }
     private void LateUpdate()
     {
-        /*
-        if (GameService.currentPhase != GamePhase.MAIN_MENU ||
-        m_ScrollViewport == null ||
-        m_ActiveBrushModels.Count == 0)
-            return;
-
-        Rect viewportRect = m_ScrollViewport.rect;
-        Vector3 viewportWorldPos = m_ScrollViewport.position;
-
-        foreach (GameObject model in m_ActiveBrushModels)
-        {
-            if (model == null) continue;
-
-            foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
-            {
-                if (r == null) continue;
-
-                // Pega a posição do renderer no espaço da tela
-                Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(null, r.transform.position);
-
-                // Verifica se está dentro da área visível do ScrollView
-                bool isVisible = screenPos.y > viewportWorldPos.y - 50 &&
-                                 screenPos.y < viewportWorldPos.y + viewportRect.height + 50;
-
-                // Ativa ou desativa o renderer (muito mais estável que mudar material)
-                r.enabled = isVisible;
-            }
-        }
-        */
+        
         if (GameService.currentPhase != GamePhase.MAIN_MENU ||
         m_ScrollViewport == null ||
         m_ActiveBrushModels.Count == 0)
@@ -124,11 +96,10 @@ public class MainMenuView : View<MainMenuView>
             float visibility = Mathf.InverseLerp(m_FadeEndDistance, m_FadeStartDistance, distanceToEdge);
             visibility = Mathf.Clamp01(visibility);
 
-            // Aplica escala
+            // Scale
             float targetScale = 80f * visibility;
             model.transform.localScale = new Vector3(targetScale, targetScale, targetScale);
 
-            // ===================== CORREÇÃO DO ERRO =====================
             Renderer[] renderers = model.GetComponentsInChildren<Renderer>();
             foreach (Renderer rend in renderers)
             {
@@ -136,18 +107,16 @@ public class MainMenuView : View<MainMenuView>
                 {
                     Color currentColor;
 
-                    // Pega a cor atual de forma segura
                     if (rend.material.HasProperty("_TintColor"))
                         currentColor = rend.material.GetColor("_TintColor");
                     else if (rend.material.HasProperty("_Color"))
                         currentColor = rend.material.GetColor("_Color");
                     else
-                        continue; // pula se não tiver nenhuma das duas propriedades
+                        continue; 
 
-                    // Modifica só o alpha
+
                     currentColor.a = visibility;
 
-                    // Aplica de volta de forma segura
                     if (rend.material.HasProperty("_TintColor"))
                         rend.material.SetColor("_TintColor", currentColor);
                     else if (rend.material.HasProperty("_Color"))
@@ -257,81 +226,63 @@ public class MainMenuView : View<MainMenuView>
       GameService.StartBoosterMode();
     }
 
-
-    /// <summary>
-    /// Popula o ScrollView com todos os skins (Brush + Cores)
-    /// Lógica: Para cada brush, cria botões de todas as suas cores
-    /// </summary>
     public void PopulateSkinButtons()
     {
         /*
-        // Limpa botões anteriores
         foreach (Transform child in m_SkinButtonContainer)
             Destroy(child.gameObject);
 
-        for (int brushIndex = 0; brushIndex < GameService.m_Skins.Count; brushIndex++)
+        m_ActiveBrushModels.Clear();
+
+        List<SkinData> allSkins = GameService.m_Skins;
+
+        for (int brushIndex = 0; brushIndex < allSkins.Count; brushIndex++)
         {
-            SkinData skin = GameService.m_Skins[brushIndex];
+            SkinData skin = allSkins[brushIndex];
             int colorCount = skin.Color.m_Colors.Count;
 
             for (int colorIndex = 0; colorIndex < colorCount; colorIndex++)
             {
                 GameObject buttonGO = Instantiate(m_SkinButtonPrefab, m_SkinButtonContainer);
-                
-
-                // Segurança do Button
                 Button btn = buttonGO.GetComponent<Button>();
-                if (btn == null)
-                {
-                    Debug.LogError("[MainMenuView] m_SkinButtonPrefab não tem Button no root!");
-                    continue;
-                }
+                if (btn == null) continue;
 
                 int capturedBrush = brushIndex;
                 int capturedColor = colorIndex;
                 btn.onClick.AddListener(() => SelectSkin(capturedBrush, capturedColor));
 
-                // =====================================================
-                // NOVA LÓGICA: Instancia o modelo 3D dentro do filho "brush"
-                // =====================================================
                 Transform brushContainer = buttonGO.transform.Find("Brush");
                 if (brushContainer == null)
                 {
-                    Debug.LogWarning("[MainMenuView] Não encontrou o filho 'brush' no botão");
+                    Debug.LogWarning("[MainMenuView] Não encontrou o filho 'Brush' no botão prefab!");
                     continue;
                 }
 
-                // Limpa qualquer modelo anterior dentro do container
                 for (int i = brushContainer.childCount - 1; i >= 0; i--)
                 {
                     Destroy(brushContainer.GetChild(i).gameObject);
                 }
 
-                // Instancia o modelo do brush
                 GameObject brushModel = Instantiate(skin.Brush.m_Prefab, brushContainer);
-                m_ActiveBrushModels.Add(brushModel);//iNSTATIATE
+                m_ActiveBrushModels.Add(brushModel);
 
-                // Aplica a cor
                 Color targetColor = skin.Color.m_Colors[colorIndex];
 
-                Brush brushComp = brushModel.GetComponent<Brush>();
-                if (brushComp != null && brushComp.m_Renderers != null)
+                Renderer[] renderers = brushModel.GetComponentsInChildren<Renderer>();
+                foreach (Renderer rend in renderers)
                 {
-                    foreach (Renderer r in brushComp.m_Renderers)
-                        if (r != null && r.material != null)
-                            r.material.color = targetColor;
-                }
-                else
-                {
-                    foreach (Renderer r in brushModel.GetComponentsInChildren<Renderer>())
-                        if (r != null && r.material != null)
-                            r.material.color = targetColor;
+                    if (rend != null && rend.material != null)
+                    {
+                        if (rend.material.HasProperty("_TintColor"))
+                            rend.material.SetColor("_TintColor", targetColor);
+                        else if (rend.material.HasProperty("_Color"))
+                            rend.material.SetColor("_Color", targetColor);
+                    }
                 }
 
                 brushModel.transform.localPosition = Vector3.zero;
                 brushModel.transform.localRotation = Quaternion.identity;
-                brushModel.transform.localScale = new Vector3(80,80,80);
-                m_ActiveBrushModels.Add(brushModel);
+                brushModel.transform.localScale = new Vector3(80, 80, 80);
             }
         }
         */
@@ -374,19 +325,27 @@ public class MainMenuView : View<MainMenuView>
 
                 Color targetColor = skin.Color.m_Colors[colorIndex];
 
-                // ===================== CORREÇÃO DO ERRO =====================
-                Renderer[] renderers = brushModel.GetComponentsInChildren<Renderer>();
-                foreach (Renderer rend in renderers)
+                Brush brushComponent = brushModel.GetComponent<Brush>();
+                if (brushComponent != null && brushComponent.m_Renderers != null)
                 {
-                    if (rend != null && rend.material != null)
+                    foreach (Renderer renderer in brushComponent.m_Renderers)
                     {
-                        if (rend.material.HasProperty("_TintColor"))
-                            rend.material.SetColor("_TintColor", targetColor);
-                        else if (rend.material.HasProperty("_Color"))
-                            rend.material.SetColor("_Color", targetColor);
+                        if (renderer != null && renderer.material != null)
+                        {
+                            renderer.material.color = targetColor;
+                        }
                     }
                 }
-                // ============================================================
+                else
+                {
+                    Renderer[] renderers = brushModel.GetComponentsInChildren<Renderer>();
+                    foreach (Renderer r in renderers)
+                    {
+                        if (r != null && r.material != null)
+                            r.material.color = targetColor;
+                    }
+                }
+                // =====================================================
 
                 brushModel.transform.localPosition = Vector3.zero;
                 brushModel.transform.localRotation = Quaternion.identity;
@@ -394,9 +353,8 @@ public class MainMenuView : View<MainMenuView>
             }
         }
     }
-    /// <summary>
-    /// Chamado quando o jogador clica em um skin da lista
-    /// </summary>
+
+    //WHen the player click on the button- change the skin and make the player brush and color
     public void SelectSkin(int brushIndex, int colorIndex)
     {
         
@@ -404,14 +362,11 @@ public class MainMenuView : View<MainMenuView>
         m_SelectedColorIndex = colorIndex;
         UpdateSelectedBrushPreview(brushIndex, colorIndex);
 
-        // =====================================================
-        // AGORA EQUIPA O SKIN NO JOGADOR (igual ao ChangeBrush)
-        // =====================================================
         m_IdSkin = brushIndex;
         GameService.m_PlayerSkinID = brushIndex;
         m_StatsService.FavoriteSkin = brushIndex;
 
-        // Atualiza o brush do título com o skin selecionado
+        // Update brush
         int clampedIndex = Mathf.Min(brushIndex, GameService.m_Skins.Count - 1);
         if (m_BrushesPrefab != null)
         {
@@ -423,20 +378,17 @@ public class MainMenuView : View<MainMenuView>
             }
         }
 
-        // Aplica a cor no jogador (igual ao ChangeBrush)
+        // Apply color
         GameService.SetColor(GameService.ComputeCurrentPlayerColor(true, 0));
     }
 
-    /// <summary>
-    /// Atualiza o preview 3D do brush selecionado
-    /// </summary>
+    //Update selected brush
     private void UpdateSelectedBrushPreview(int brushIndex, int colorIndex)
     {
-        
+      
         SkinData skin = GameService.m_Skins[brushIndex];
         Color targetColor = skin.Color.m_Colors[colorIndex];
 
-        // 1. Deleta o modelo anterior (filho do SelectedBrush)
         if (m_SelectedBrushPreviewParent.childCount > 0)
         {
             for (int i = m_SelectedBrushPreviewParent.childCount - 1; i >= 0; i--)
@@ -445,11 +397,9 @@ public class MainMenuView : View<MainMenuView>
             }
         }
 
-        // 2. Instancia o novo modelo como FILHO do SelectedBrush
         GameObject newModel = Instantiate(skin.Brush.m_Prefab, m_SelectedBrushPreviewParent);
         m_CurrentPreviewBrush = newModel;
 
-        // 3. Aplica a cor (exatamente igual ao PopulateSkinButtons)
         Brush brushComponent = newModel.GetComponent<Brush>();
         if (brushComponent != null && brushComponent.m_Renderers != null)
         {
@@ -463,7 +413,6 @@ public class MainMenuView : View<MainMenuView>
         }
         else
         {
-            // Fallback caso o prefab não tenha o componente Brush configurado
             Renderer[] renderers = newModel.GetComponentsInChildren<Renderer>();
             foreach (Renderer r in renderers)
             {
@@ -472,10 +421,11 @@ public class MainMenuView : View<MainMenuView>
             }
         }
 
-        // 4. Garante posicionamento e rotação corretos
         newModel.transform.localPosition = Vector3.zero;
         newModel.transform.localRotation = Quaternion.identity;
         newModel.transform.localScale = new Vector3(100 , 100, 100);
+        
+        
     }
     
     //DebugBtns Activate/Deactivate and Check
@@ -491,8 +441,16 @@ public class MainMenuView : View<MainMenuView>
     }
     public void CheckBoosterModeLevelAvaliable()
     {
-        if (GameService.Debug_EnableBoosterMode) m_BoosterModeBTN.SetActive(true);
-        else m_BoosterModeBTN.SetActive(false);
+        if (GameService.Debug_EnableBoosterMode)
+        {
+            m_BoosterModeBTN.SetActive(true);
+            m_oldPlayBtn.SetActive(false);
+        }
+        else 
+        {
+            m_BoosterModeBTN.SetActive(false);
+            m_oldPlayBtn.SetActive(true);
+        } 
     }
     public void CheckNewSelectionBrushAvaliable()
     {
