@@ -19737,7 +19737,7 @@ MonoBehaviour:
   m_ParticleSystem: {fileID: 198098790276296408}
   m_IdleParticleSystem: {fileID: 198757457519128994}
   m_Shadow: {fileID: 1055350778699962}
-  m_speedMultiplier: 1.2
+  m_speedMultiplier: 1.4
 --- !u!1 &1779027566444506
 GameObject:
   m_ObjectHideFlags: 0

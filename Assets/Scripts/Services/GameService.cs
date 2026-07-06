@@ -38,7 +38,8 @@ public class GameService : IGameService
     public int BoosterLevel { get;  set; } = 1;
     public List<PowerUpData> m_SelectedBoosterPowerUps = new List<PowerUpData>();
     public List<BoosterLevelSetup> m_BoosterLevelSetups;
-    public static bool Debug_EnableBoosterMode { get; set; } = false;
+    public bool Debug_EnableBoosterMode { get; set; } = false;
+    public bool Debug_EnableNewSelectionBrush { get; set; } = false;
 
 #if UNITY_EDITOR
     public int m_DebugLevel = 1;
@@ -681,4 +682,6 @@ public class GameService : IGameService
     {
         return m_PowerUps;
     }
+
+    
 }

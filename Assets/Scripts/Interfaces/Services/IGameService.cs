@@ -11,6 +11,8 @@ public interface IGameService
     bool m_IsPlaying { get; set; }
     bool IsBoosterMode { get; set; }
     int BoosterLevel { get; set; } 
+    bool Debug_EnableBoosterMode { get; set; }
+    bool Debug_EnableNewSelectionBrush { get; set; }
     GamePhase currentPhase { get; }
     int m_PlayerSkinID { get; set; }
     List<SkinData> m_Skins { get; set; }

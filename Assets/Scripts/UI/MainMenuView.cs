@@ -45,6 +45,11 @@ public class MainMenuView : View<MainMenuView>
     private List<GameObject> m_ActiveBrushModels = new List<GameObject>();
     private Dictionary<Renderer, float> m_RendererMinAlpha = new Dictionary<Renderer, float>();
 
+    //DebugBtns
+    public GameObject m_BoosterModeBTN;
+    public GameObject m_NewSelectionBtn;
+    public GameObject m_OldSelectionBtn;
+
     [Inject]
     public void Construct(IStatsService statsService)
     {
@@ -133,20 +138,12 @@ public class MainMenuView : View<MainMenuView>
                 if (m_BoosterLevelText != null)
                     m_BoosterLevelText.text = GameService.BoosterLevel.ToString();
                 PopulateSkinButtons();
-                if (m_BrushesPrefab != null)
-                {
-                    m_BrushesPrefab.SetActive(true);
-                    int favoriteSkin = Mathf.Min(m_StatsService.FavoriteSkin, GameService.m_Skins.Count - 1);
+                int currentSkin = Mathf.Min(m_StatsService.FavoriteSkin, GameService.m_Skins.Count - 1);
 
-                    var brushMainMenu = m_BrushesPrefab.GetComponent<BrushMainMenu>();
-                    if (brushMainMenu != null)
-                    {
-                        brushMainMenu.Set(GameService.m_Skins[favoriteSkin]);
+                m_SelectedBrushIndex = currentSkin;
+                m_SelectedColorIndex = Mathf.Clamp(m_SelectedColorIndex, 0, GameService.m_Skins[currentSkin].Color.m_Colors.Count - 1);
 
-                        // Força reset de rotação (evita o brush ficar rotacionado)
-                        m_BrushesPrefab.transform.localRotation = Quaternion.identity;
-                    }
-                }
+                UpdateSelectedBrushPreview(currentSkin, m_SelectedColorIndex);
                 break;
 
             case GamePhase.LOADING:
@@ -229,29 +226,7 @@ public class MainMenuView : View<MainMenuView>
     /// </summary>
     public void PopulateSkinButtons()
     {
-        /*
-        // Limpa botões anteriores
-        foreach (Transform child in m_SkinButtonContainer)
-            Destroy(child.gameObject);
-
-        for (int brushIndex = 0; brushIndex < GameService.m_Skins.Count; brushIndex++)
-        {
-            SkinData skin = GameService.m_Skins[brushIndex];
-            int colorCount = skin.Color.m_Colors.Count;
-
-            for (int colorIndex = 0; colorIndex < colorCount; colorIndex++)
-            {
-                GameObject buttonGO = Instantiate(m_SkinButtonPrefab, m_SkinButtonContainer);
-
-                // Configura o botão (adicione um componente SkinButton no prefab ou use isso)
-                Button btn = buttonGO.GetComponent<Button>();
-                int capturedBrush = brushIndex;
-                int capturedColor = colorIndex;
-
-                btn.onClick.AddListener(() => SelectSkin(capturedBrush, capturedColor));
-            }
-        }
-        */
+        
         // Limpa botões anteriores
         foreach (Transform child in m_SkinButtonContainer)
             Destroy(child.gameObject);
@@ -328,17 +303,7 @@ public class MainMenuView : View<MainMenuView>
     /// </summary>
     public void SelectSkin(int brushIndex, int colorIndex)
     {
-        /*
-        m_SelectedBrushIndex = brushIndex;
-        m_SelectedColorIndex = colorIndex;
-
-        UpdateSelectedBrushPreview(brushIndex, colorIndex);
-
-        // Aqui você pode salvar temporariamente ou já aplicar
-        GameService.m_PlayerSkinID = brushIndex;
-        // Se quiser salvar direto:
-        // m_StatsService.FavoriteSkin = brushIndex;
-        */
+        
         m_SelectedBrushIndex = brushIndex;
         m_SelectedColorIndex = colorIndex;
         UpdateSelectedBrushPreview(brushIndex, colorIndex);
@@ -371,51 +336,7 @@ public class MainMenuView : View<MainMenuView>
     /// </summary>
     private void UpdateSelectedBrushPreview(int brushIndex, int colorIndex)
     {
-        /*
-        SkinData skin = GameService.m_Skins[brushIndex];
-        Color targetColor = skin.Color.m_Colors[colorIndex];
-
-        // 1. Deleta o modelo anterior (filho do SelectedBrush)
-        if (m_SelectedBrushPreviewParent.childCount > 0)
-        {
-            for (int i = m_SelectedBrushPreviewParent.childCount - 1; i >= 0; i--)
-            {
-                Destroy(m_SelectedBrushPreviewParent.GetChild(i).gameObject);
-            }
-        }
-
-        // 2. Instancia o novo modelo como FILHO do SelectedBrush
-        GameObject newModel = Instantiate(skin.Brush.m_Prefab, m_SelectedBrushPreviewParent);
-        m_CurrentPreviewBrush = newModel;
-
-        // 3. Aplica a cor correta
-        Brush brushComponent = newModel.GetComponent<Brush>();
-        if (brushComponent != null && brushComponent.m_Renderers != null)
-        {
-            foreach (Renderer renderer in brushComponent.m_Renderers)
-            {
-                if (renderer != null && renderer.material != null)
-                {
-                    renderer.material.color = targetColor;
-                }
-            }
-        }
-        else
-        {
-            // Fallback caso o prefab não tenha o componente Brush configurado
-            Renderer[] renderers = newModel.GetComponentsInChildren<Renderer>();
-            foreach (Renderer r in renderers)
-            {
-                if (r.material != null)
-                    r.material.color = targetColor;
-            }
-        }
-
-        // 4. Garante posicionamento correto
-        newModel.transform.localPosition = Vector3.zero;
-        newModel.transform.localRotation = Quaternion.identity;
-        newModel.transform.localScale = new Vector3(80,80,80);
-        */
+        
         SkinData skin = GameService.m_Skins[brushIndex];
         Color targetColor = skin.Color.m_Colors[colorIndex];
 
@@ -458,8 +379,36 @@ public class MainMenuView : View<MainMenuView>
         // 4. Garante posicionamento e rotação corretos
         newModel.transform.localPosition = Vector3.zero;
         newModel.transform.localRotation = Quaternion.identity;
-        newModel.transform.localScale = new Vector3(80, 80, 80);
+        newModel.transform.localScale = new Vector3(100 , 100, 100);
     }
 
-
+    //DebugBtns Activate/Deactivate and Check
+    public void ActivateDeactivateBoosterMode()
+    {
+        GameService.Debug_EnableBoosterMode = !GameService.Debug_EnableBoosterMode;
+        CheckBoosterModeLevelAvaliable();
+    }
+    public void ActivateDeactivateNewSelection()
+    {
+        GameService.Debug_EnableNewSelectionBrush = !GameService.Debug_EnableNewSelectionBrush;
+        CheckNewSelectionBrushAvaliable();
+    }
+    public void CheckBoosterModeLevelAvaliable()
+    {
+        if (GameService.Debug_EnableBoosterMode) m_BoosterModeBTN.SetActive(true);
+        else m_BoosterModeBTN.SetActive(false);
+    }
+    public void CheckNewSelectionBrushAvaliable()
+    {
+        if (GameService.Debug_EnableNewSelectionBrush)
+        {
+            m_NewSelectionBtn.SetActive(true);
+            m_OldSelectionBtn.SetActive(false);
+        }
+        else
+        {
+            m_NewSelectionBtn.SetActive(false);
+            m_OldSelectionBtn.SetActive(true);
+        }
+    }
 }
