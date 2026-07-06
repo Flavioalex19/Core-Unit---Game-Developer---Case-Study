@@ -212,11 +212,21 @@ public class MainMenuView : View<MainMenuView>
     public void ChangeBrush(int _NewBrush)
     {
         _NewBrush = Mathf.Clamp(_NewBrush, 0, GameService.m_Skins.Count);
+        //
+        int maxAllowed = GameService.Debug_EnableNewSelectionBrush
+        ? GameService.m_Skins.Count - 1
+        : GameService.m_Skins.Count - 3;
+
+        if (maxAllowed < 0) maxAllowed = 0;
+
+        _NewBrush = Mathf.Clamp(_NewBrush, 0, maxAllowed);
+        //
         m_IdSkin = _NewBrush;
         if (m_IdSkin >= GameService.m_Skins.Count)
             m_IdSkin = 0;
         GameService.m_PlayerSkinID = m_IdSkin;
-        int favoriteSkin = Mathf.Min(m_StatsService.FavoriteSkin, GameService.m_Skins.Count - 1);
+        //int favoriteSkin = Mathf.Min(m_StatsService.FavoriteSkin, GameService.m_Skins.Count - 1);
+        int favoriteSkin = Mathf.Min(m_IdSkin, maxAllowed);
         m_BrushesPrefab.GetComponent<BrushMainMenu>().Set(GameService.m_Skins[favoriteSkin]);
         m_StatsService.FavoriteSkin = m_IdSkin;
         GameService.SetColor(GameService.ComputeCurrentPlayerColor(true, 0));
@@ -228,64 +238,7 @@ public class MainMenuView : View<MainMenuView>
 
     public void PopulateSkinButtons()
     {
-        /*
-        foreach (Transform child in m_SkinButtonContainer)
-            Destroy(child.gameObject);
 
-        m_ActiveBrushModels.Clear();
-
-        List<SkinData> allSkins = GameService.m_Skins;
-
-        for (int brushIndex = 0; brushIndex < allSkins.Count; brushIndex++)
-        {
-            SkinData skin = allSkins[brushIndex];
-            int colorCount = skin.Color.m_Colors.Count;
-
-            for (int colorIndex = 0; colorIndex < colorCount; colorIndex++)
-            {
-                GameObject buttonGO = Instantiate(m_SkinButtonPrefab, m_SkinButtonContainer);
-                Button btn = buttonGO.GetComponent<Button>();
-                if (btn == null) continue;
-
-                int capturedBrush = brushIndex;
-                int capturedColor = colorIndex;
-                btn.onClick.AddListener(() => SelectSkin(capturedBrush, capturedColor));
-
-                Transform brushContainer = buttonGO.transform.Find("Brush");
-                if (brushContainer == null)
-                {
-                    Debug.LogWarning("[MainMenuView] Não encontrou o filho 'Brush' no botão prefab!");
-                    continue;
-                }
-
-                for (int i = brushContainer.childCount - 1; i >= 0; i--)
-                {
-                    Destroy(brushContainer.GetChild(i).gameObject);
-                }
-
-                GameObject brushModel = Instantiate(skin.Brush.m_Prefab, brushContainer);
-                m_ActiveBrushModels.Add(brushModel);
-
-                Color targetColor = skin.Color.m_Colors[colorIndex];
-
-                Renderer[] renderers = brushModel.GetComponentsInChildren<Renderer>();
-                foreach (Renderer rend in renderers)
-                {
-                    if (rend != null && rend.material != null)
-                    {
-                        if (rend.material.HasProperty("_TintColor"))
-                            rend.material.SetColor("_TintColor", targetColor);
-                        else if (rend.material.HasProperty("_Color"))
-                            rend.material.SetColor("_Color", targetColor);
-                    }
-                }
-
-                brushModel.transform.localPosition = Vector3.zero;
-                brushModel.transform.localRotation = Quaternion.identity;
-                brushModel.transform.localScale = new Vector3(80, 80, 80);
-            }
-        }
-        */
         foreach (Transform child in m_SkinButtonContainer)
             Destroy(child.gameObject);
 
