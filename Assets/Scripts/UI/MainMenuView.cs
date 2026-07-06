@@ -42,8 +42,47 @@ public class MainMenuView : View<MainMenuView>
     public RectTransform m_ScrollViewport;     // Viewport do ScrollRect
     public float m_TopFadeStart = 90f;         // Distância do topo onde começa o fade (em pixels)
     public float m_TopFadeEnd = 25f;           // Distância onde some completamente
-    private List<GameObject> m_ActiveBrushModels = new List<GameObject>();
-    private Dictionary<Renderer, float> m_RendererMinAlpha = new Dictionary<Renderer, float>();
+    private List<RotatingIconUI> m_ActiveRotatingIcons = new List<RotatingIconUI>();
+    private List<RectTransform> m_ActiveIconRects = new List<RectTransform>(); // paralelo, pra checar visibilidade
+
+    [Header("Rotating Icons Throttle")]
+    public float m_IconTickInterval = 0.05f; // ~20x/seg checagem de visibilidade, controla o "tick" de todos
+    private float m_IconTickTimer;
+
+    [Header("Rotating Icons - Resources Path")]
+    public string m_BrushIconsResourcesFolder = "BrushIcons"; // Assets/Resources/BrushIcons/{NomeDoBrush}/
+
+    private Dictionary<string, Sprite[]> m_IconFramesCache = new Dictionary<string, Sprite[]>();
+
+    /// <summary>
+    /// Carrega (com cache) os frames do turntable de um brush a partir de
+    /// Resources/BrushIcons/{NomeDoPrefab}/frame_XX.png
+    /// </summary>
+    private Sprite[] GetIconFramesForBrush(SkinData skin)
+    {
+        string brushKey = skin.Brush.m_Prefab.name; // usa o nome do prefab como chave
+
+        if (m_IconFramesCache.TryGetValue(brushKey, out Sprite[] cachedFrames))
+            return cachedFrames;
+
+        string path = m_BrushIconsResourcesFolder + "/" + brushKey;
+        Sprite[] frames = Resources.LoadAll<Sprite>(path);
+
+        if (frames == null || frames.Length == 0)
+        {
+            Debug.LogWarning($"[MainMenuView] Nenhum frame encontrado em Resources/{path}");
+            frames = new Sprite[0];
+        }
+        else
+        {
+            // Resources.LoadAll não garante ordem numérica correta em todas as plataformas,
+            // então ordenamos pelo nome do arquivo (frame_00, frame_01, ...)
+            System.Array.Sort(frames, (a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
+        }
+
+        m_IconFramesCache[brushKey] = frames;
+        return frames;
+    }
 
     //DebugBtns
     public GameObject m_BoosterModeBTN;
@@ -64,12 +103,14 @@ public class MainMenuView : View<MainMenuView>
     }
     private void LateUpdate()
     {
+        /*
         if (GameService.currentPhase != GamePhase.MAIN_MENU ||
         m_ScrollViewport == null ||
         m_ActiveBrushModels.Count == 0)
             return;
 
-        float viewportHeight = m_ScrollViewport.rect.height;
+        Rect viewportRect = m_ScrollViewport.rect;
+        Vector3 viewportWorldPos = m_ScrollViewport.position;
 
         foreach (GameObject model in m_ActiveBrushModels)
         {
@@ -77,46 +118,52 @@ public class MainMenuView : View<MainMenuView>
 
             foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
             {
-                if (r == null || r.material == null) continue;
+                if (r == null) continue;
 
-                // Calcula a distância do topo usando a posição DE CADA Renderer
-                Vector3 screenPos = Camera.main.WorldToScreenPoint(r.transform.position);
-                float distanceFromTop = viewportHeight - (screenPos.y - m_ScrollViewport.position.y);
+                // Pega a posição do renderer no espaço da tela
+                Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(null, r.transform.position);
 
-                // Fade individual por objeto
-                float alpha = Mathf.InverseLerp(m_TopFadeEnd, m_TopFadeStart, distanceFromTop);
-                alpha = Mathf.Clamp01(alpha);
-                
-                if (alpha < 0.95f)
-                {
-                    Material mat = r.material;
+                // Verifica se está dentro da área visível do ScrollView
+                bool isVisible = screenPos.y > viewportWorldPos.y - 50 &&
+                                 screenPos.y < viewportWorldPos.y + viewportRect.height + 50;
 
-                    // Muda para modo Fade (transparente)
-                    mat.SetFloat("_Mode", 2); // 2 = Fade
-                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    mat.SetInt("_ZWrite", 0);
-                    mat.DisableKeyword("_ALPHATEST_ON");
-                    mat.EnableKeyword("_ALPHABLEND_ON");
-                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    mat.renderQueue = 3000;
-                }
-                
-                // Aplica alpha no material
-                if (r.material.HasProperty("_Color"))
-                {
-                    Color c = r.material.color;
-                    r.material.color = new Color(c.r, c.g, c.b, alpha);
-                }
-                else if (r.material.HasProperty("_TintColor"))
-                {
-                    Color c = r.material.GetColor("_TintColor");
-                    r.material.SetColor("_TintColor", new Color(c.r, c.g, c.b, alpha));
-                }
-
-                // Corrige sobreposição
-                r.material.SetInt("_ZWrite", alpha < 0.95f ? 0 : 1);
+                // Ativa ou desativa o renderer (muito mais estável que mudar material)
+                r.enabled = isVisible;
             }
+        }
+        */
+        if (GameService.currentPhase != GamePhase.MAIN_MENU ||
+        m_ScrollViewport == null ||
+        m_ActiveRotatingIcons.Count == 0)
+            return;
+
+        // Throttle: não precisa checar visibilidade nem avançar frame todo Update
+        m_IconTickTimer += Time.deltaTime;
+        if (m_IconTickTimer < m_IconTickInterval)
+            return;
+
+        float elapsed = m_IconTickTimer;
+        m_IconTickTimer = 0f;
+
+        Vector3 viewportScreenPos = RectTransformUtility.WorldToScreenPoint(null, m_ScrollViewport.position);
+        Rect viewportRect = m_ScrollViewport.rect;
+
+        float topLimit = viewportScreenPos.y + viewportRect.height;
+        float bottomLimit = viewportScreenPos.y;
+        float margin = 60f;
+
+        for (int i = 0; i < m_ActiveRotatingIcons.Count; i++)
+        {
+            RotatingIconUI icon = m_ActiveRotatingIcons[i];
+            RectTransform rect = m_ActiveIconRects[i];
+            if (icon == null || rect == null) continue;
+
+            Vector3 iconScreenPos = RectTransformUtility.WorldToScreenPoint(null, rect.position);
+            bool isVisible = iconScreenPos.y > (bottomLimit - margin) &&
+                              iconScreenPos.y < (topLimit + margin);
+
+            icon.SetVisible(isVisible);
+            icon.Tick(elapsed); // só avança frame de verdade se IsVisible == true (checado dentro do Tick)
         }
     }
     public void OnPlayButton()
@@ -226,7 +273,7 @@ public class MainMenuView : View<MainMenuView>
     /// </summary>
     public void PopulateSkinButtons()
     {
-        
+        /*
         // Limpa botões anteriores
         foreach (Transform child in m_SkinButtonContainer)
             Destroy(child.gameObject);
@@ -296,8 +343,53 @@ public class MainMenuView : View<MainMenuView>
                 m_ActiveBrushModels.Add(brushModel);
             }
         }
-    }
+        */
+        // Limpa
+        foreach (Transform child in m_SkinButtonContainer)
+            Destroy(child.gameObject);
 
+        m_ActiveRotatingIcons.Clear();
+        m_ActiveIconRects.Clear();
+
+        for (int brushIndex = 0; brushIndex < GameService.m_Skins.Count; brushIndex++)
+        {
+            SkinData skin = GameService.m_Skins[brushIndex];
+            int colorCount = skin.Color.m_Colors.Count;
+
+            for (int colorIndex = 0; colorIndex < colorCount; colorIndex++)
+            {
+                GameObject buttonGO = Instantiate(m_SkinButtonPrefab, m_SkinButtonContainer);
+
+                Button btn = buttonGO.GetComponent<Button>();
+                if (btn == null) continue;
+
+                int capturedBrush = brushIndex;
+                int capturedColor = colorIndex;
+                btn.onClick.AddListener(() => SelectSkin(capturedBrush, capturedColor));
+
+                // === Visual 2D com rotação (sprite sheet) ===
+                Transform visualChild = buttonGO.transform.Find("Visual");
+                if (visualChild != null)
+                {
+                    Image img = visualChild.GetComponent<Image>();
+                    RotatingIconUI rotatingIcon = visualChild.GetComponent<RotatingIconUI>();
+                    if (rotatingIcon == null)
+                        rotatingIcon = visualChild.gameObject.AddComponent<RotatingIconUI>();
+
+                    if (img != null)
+                    {
+                        Color targetColor = skin.Color.m_Colors[colorIndex];
+                        Sprite[] frames = GetIconFramesForBrush(skin);
+
+                        rotatingIcon.Init(frames, targetColor);
+
+                        m_ActiveRotatingIcons.Add(rotatingIcon);
+                        m_ActiveIconRects.Add(visualChild as RectTransform);
+                    }
+                }
+            }
+        }
+    }
     /// <summary>
     /// Chamado quando o jogador clica em um skin da lista
     /// </summary>
@@ -381,7 +473,7 @@ public class MainMenuView : View<MainMenuView>
         newModel.transform.localRotation = Quaternion.identity;
         newModel.transform.localScale = new Vector3(100 , 100, 100);
     }
-
+    
     //DebugBtns Activate/Deactivate and Check
     public void ActivateDeactivateBoosterMode()
     {
