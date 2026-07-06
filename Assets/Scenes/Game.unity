@@ -469,10 +469,10 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: -0.93
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
-  orthographic: 1
+  orthographic: 0
   orthographic size: 5
   m_Depth: -2.46
   m_CullingMask:
@@ -498,7 +498,7 @@ Transform:
   m_GameObject: {fileID: 45858369}
   serializedVersion: 2
   m_LocalRotation: {x: 0.4005307, y: 0.35224122, z: -0.17032452, w: 0.82854754}
-  m_LocalPosition: {x: -72.3, y: -71.1, z: 1156.3}
+  m_LocalPosition: {x: -71.04, y: -73.3, z: 1157.51}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1017,7 +1017,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 248783354}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.00071956}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1027,7 +1027,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1872.7, y: 680.63}
+  m_AnchoredPosition: {x: -1752.1, y: 680.63}
   m_SizeDelta: {x: 180.03, y: 556.74}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &290526289
@@ -2096,9 +2096,19 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
         type: 3}
+      propertyPath: m_BrushRenderCamera
+      value: 
+      objectReference: {fileID: 45858371}
+    - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
+        type: 3}
       propertyPath: brushPreviewPosition
       value: 
       objectReference: {fileID: 1367404044}
+    - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
+        type: 3}
+      propertyPath: m_BrushRenderTexture
+      value: 
+      objectReference: {fileID: 8400000, guid: 400e875dfa983124c908a5800361b18e, type: 2}
     - target: {fileID: 114863918100999332, guid: ade9dc1200e32bb45ad4a7d1f3cda793,
         type: 3}
       propertyPath: m_SkinButtonContainer
@@ -4580,7 +4590,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1367404044}
-  - component: {fileID: 1367404045}
   m_Layer: 11
   m_Name: BrushArea
   m_TagString: Untagged
@@ -4597,25 +4606,13 @@ Transform:
   m_GameObject: {fileID: 1367404043}
   serializedVersion: 2
   m_LocalRotation: {x: 0.4005307, y: 0.35224122, z: -0.17032452, w: 0.82854754}
-  m_LocalPosition: {x: -69.92, y: -75.27, z: 1158.59}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -69.3, y: -82.5, z: 1159.2}
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1815457508}
   m_Father: {fileID: 1993575766}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1367404045
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1367404043}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13843e817b933419f9e0ac70c05ce8e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1369991479
 GameObject:
   m_ObjectHideFlags: 0
@@ -6586,7 +6583,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1993575766
 Transform:
   m_ObjectHideFlags: 0
