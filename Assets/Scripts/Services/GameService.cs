@@ -1,4 +1,40 @@
-﻿using System;
+﻿// ============================================================
+// SUMMARY OF TASK - GameService
+// ============================================================
+//
+// This version implements the requirements for Feature 1 and part of Feature 2
+// 
+//
+// 1. BOOSTER MODE SYSTEM
+//    - New properties: IsBoosterMode, BoosterLevel
+//    - New data structures: m_BoosterLevelSetups, m_SelectedBoosterPowerUps
+//    - Booster level is saved/loaded using PlayerPrefs (LoadBoosterLevel / SaveBoosterLevel)
+//    - BoosterLevelSetup ScriptableObjects are loaded from Resources/BoosterLevels
+//
+// 2. BOOSTER MODE GAME FLOW
+//    - In ChangePhase (LOADING): Uses BoosterLevel as difficulty instead of normal player level
+//    - In ChangePhase (END): 
+//        • Booster level increases on win
+//        • Booster level resets to 1 on lose
+//        • Normal XP, stats and PreEndView are skipped while in Booster Mode
+//    - New method: StartBoosterMode() - starts a booster run
+//    - RestartBoosterMatch() - restarts a booster match after game over
+//    - TurnOffBoosterMode()
+//
+// 3. DYNAMIC POWER-UP SPAWNING
+//    - In normal mode: Excludes "SpeedBoost" and "ColorFill" power-ups
+//    - In Booster Mode: Uses power-ups defined in the current BoosterLevelSetup
+//
+// 4. DEBUG FLAGS
+//    - Added Debug_EnableBoosterMode and Debug_EnableNewSelectionBrush
+//    - These flags are used by MainMenuView to unlock features during development
+//
+// 5. OTHER ADJUSTMENTS
+//    - EndView now receives title color in the END phase
+//    - Added GetPowerUpList() helper method
+//    - Booster level is saved in multiple points (end of match and restart)
+// ============================================================
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
@@ -142,7 +178,7 @@ public class GameService : IGameService
 
         m_PowerUps = new List<PowerUpData>(Resources.LoadAll<PowerUpData>("PowerUps"));
 
-        //Change that later???
+        //Load booser level
         LoadBoosterLevel();
 
         // Load BoosterLevelSetup from Resources/BoosterLevels
@@ -206,8 +242,7 @@ public class GameService : IGameService
         Debug.Log("Current difficulty is " + m_StatsService.GetLevel());
 #endif
         ChangePhase(GamePhase.MAIN_MENU);
-        //Debug_EnableNewBoosters = true;
-        //IsBoosterMode = true;                    
+                   
         
     }
 
@@ -632,6 +667,7 @@ public class GameService : IGameService
             return normalPowerUps[Random.Range(0, normalPowerUps.Count)];
         }
     }
+    #region BoosterMode
     public BoosterLevelSetup GetCurrentBoosterSetup()
     {
         if (m_BoosterLevelSetups == null || m_BoosterLevelSetups.Count == 0)
@@ -682,6 +718,5 @@ public class GameService : IGameService
     {
         return m_PowerUps;
     }
-
-    
+    #endregion
 }

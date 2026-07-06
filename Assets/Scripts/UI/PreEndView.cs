@@ -99,7 +99,7 @@ public class PreEndView : View<PreEndView> {
 		for (int i = 0; i < m_ColoredImages.Count; ++i)
             m_ColoredImages[i].color = _Color;
 		
-        SetXPBar(m_Level, m_XP);
+        if(GameService.IsBoosterMode == false) SetXPBar(m_Level, m_XP);
         Color color = m_XBLeftText.color;
         color.a = 1f;
         m_XBLeftText.color = color;

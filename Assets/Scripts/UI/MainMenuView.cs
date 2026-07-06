@@ -1,4 +1,35 @@
-﻿using System;
+﻿// ============================================================
+// SUMMARY OF TASK - MainMenuView // ============================================================
+//
+// This version implements the requirements for Feature 2 and part of Feature 1
+//
+// 1. NEW SKIN SELECTION SYSTEM
+//    - Full dynamic grid of skin buttons with 3D brush previews (PopulateSkinButtons)
+//    - Clickable skin + color selection (SelectSkin)
+//    - Separate preview area showing the currently selected brush (UpdateSelectedBrushPreview)
+// 2. SCROLL FADE & SCALE VISUAL EFFECT
+//    - New LateUpdate() system that scales 3D brush models
+//      based on their position inside the scroll viewport
+//    - Creates a polished visual effect where brushes near the edges
+//      become smaller 
+// 3. BOOSTER MODE INTEGRATION
+//    - Added UI and logic support for Booster Mode
+//    - Shows current Booster Level on screen
+//
+// 4. DEBUG TOOLS SECTION
+//    - New debug region with toggle buttons to enable/disable features during development:
+//        • Activate/Deactivate Booster Mode
+//        • Activate/Deactivate New Skin Selection
+//    - Useful for testing locked content without changing build settings
+//
+// 5. IMPROVED BRUSH SELECTION LOGIC
+//    - ChangeBrush() now respects Debug_EnableNewSelectionBrush flag preserving the original version of the game
+//    - When disabled: player can only access the first few skins
+//    - When enabled: all skins become available (that are on the list)
+//
+// ============================================================
+
+using System;
 using System.Collections.Generic;
 //using TMPro;
 using UnityEngine;
@@ -39,10 +70,10 @@ public class MainMenuView : View<MainMenuView>
     private int m_SelectedColorIndex;
 
     [Header("Scroll Fade")]
-    public RectTransform m_ScrollViewport;     // Viewport do ScrollRect
-    public float m_TopFadeStart = 90f;         // Distância do topo onde começa o fade (em pixels)
-    public float m_TopFadeEnd = 25f;           // Distância onde some completamente
-    private List<RectTransform> m_ActiveIconRects = new List<RectTransform>(); // paralelo, pra checar visibilidade
+    public RectTransform m_ScrollViewport;     // ScrollRect viewport
+    public float m_TopFadeStart = 90f;         // Distance From the top
+    public float m_TopFadeEnd = 25f;           // Fade distance
+    private List<RectTransform> m_ActiveIconRects = new List<RectTransform>(); // check visibility
 
     private List<GameObject> m_ActiveBrushModels = new List<GameObject>();
 
@@ -51,6 +82,7 @@ public class MainMenuView : View<MainMenuView>
     public float m_FadeStartDistance = 80f;   // distance to fade
     public float m_FadeEndDistance = 20f;
 
+    [Header("Debug Buttons")]
     //DebugBtns
     public GameObject m_BoosterModeBTN;
     public GameObject m_NewSelectionBtn;
@@ -140,6 +172,12 @@ public class MainMenuView : View<MainMenuView>
         {
             case GamePhase.MAIN_MENU:
                 m_BrushGroundLight.SetActive(true);
+                //Ensure that in the beginning all debugs starts false 
+                GameService.Debug_EnableBoosterMode = false;
+                GameService.Debug_EnableNewSelectionBrush = false;
+                CheckBoosterModeLevelAvaliable();
+                CheckNewSelectionBrushAvaliable();
+
                 Transition(true);
                 //Update BoosterMode Level
                 if (m_BoosterLevelText != null)
@@ -212,7 +250,6 @@ public class MainMenuView : View<MainMenuView>
     public void ChangeBrush(int _NewBrush)
     {
         _NewBrush = Mathf.Clamp(_NewBrush, 0, GameService.m_Skins.Count);
-        //
         int maxAllowed = GameService.Debug_EnableNewSelectionBrush
         ? GameService.m_Skins.Count - 1
         : GameService.m_Skins.Count - 3;
@@ -220,7 +257,6 @@ public class MainMenuView : View<MainMenuView>
         if (maxAllowed < 0) maxAllowed = 0;
 
         _NewBrush = Mathf.Clamp(_NewBrush, 0, maxAllowed);
-        //
         m_IdSkin = _NewBrush;
         if (m_IdSkin >= GameService.m_Skins.Count)
             m_IdSkin = 0;
@@ -235,7 +271,7 @@ public class MainMenuView : View<MainMenuView>
     {
       GameService.StartBoosterMode();
     }
-
+    #region New Brush Selection
     public void PopulateSkinButtons()
     {
 
@@ -298,7 +334,6 @@ public class MainMenuView : View<MainMenuView>
                             r.material.color = targetColor;
                     }
                 }
-                // =====================================================
 
                 brushModel.transform.localPosition = Vector3.zero;
                 brushModel.transform.localRotation = Quaternion.identity;
@@ -380,7 +415,9 @@ public class MainMenuView : View<MainMenuView>
         
         
     }
-    
+    #endregion
+
+    #region Debug Area
     //DebugBtns Activate/Deactivate and Check
     public void ActivateDeactivateBoosterMode()
     {
@@ -418,4 +455,5 @@ public class MainMenuView : View<MainMenuView>
             m_OldSelectionBtn.SetActive(true);
         }
     }
+    #endregion
 }
