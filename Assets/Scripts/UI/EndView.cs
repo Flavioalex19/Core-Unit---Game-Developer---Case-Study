@@ -167,7 +167,8 @@ public class EndView : View<EndView>
                 rankString = "th";
                 break;
         }
-        m_RankText.text = ranking.ToString() + "<size=140>" + rankString + "</size>";
+        if (GameService.IsBoosterMode) m_RankText.text = "Level " + "<size=140>" + GameService.BoosterLevel + "</size>";
+        else m_RankText.text = ranking.ToString() + "<size=140>" + rankString + "</size>";
 		m_RankText.color = m_BattleRoyaleService.GetHumanPlayer().m_Color;
 
         for (int i = 0; i < m_PlayerSlots.Count; ++i)
